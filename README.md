@@ -1,2 +1,2 @@
 # runna-plan-scheduler
-The project: a training-plan scheduler. Given a goal (5k, 10k, half), a race date, available days and a current 5k time, it generates a weekly plan, then adapts when a session is missed or the runner is ill.
+The project: a training-plan scheduler. Given a goal (5k, 10k, half), a race date, available days and a current 5k time, it generates a weekly plan, then adapts when a session is missedś.
