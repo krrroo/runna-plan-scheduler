@@ -1,6 +1,8 @@
 from dataclasses import dataclass
 from scheduler.config import Rules, DEFAULT_RULES
 from scheduler.plan import Runner, RaceGoal, Plan
+from datetime import date
+
 @dataclass
 class PlanGenerator:
     rules: Rules = DEFAULT_RULES
