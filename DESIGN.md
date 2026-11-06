@@ -56,7 +56,8 @@ if actual_km / planned_km < rules.missed_mileage_threshold:
 
 | Rule | If broken |
 |---|---|
-| Every week has easy/tempo/intervals and a long run | Bug in the generator (caught by tests) |
+| Every week has easy/tempo/intervals and a long run. Long run doesn't have to happen on a partial start week or race week. | Bug in the generator (caught by tests) |
+| Race week ends with a race session. | Bug in the generator |
 | No tempo or intervals the day after a long run | Bug in the generator (caught by tests) |
 | Weekly km rises by at most 10% | Bug in the generator (caught by tests) · Warning to the user if they continue after missing mileage |
 | Volume tapers down in the final weeks | Bug in the generator (caught by tests) |
