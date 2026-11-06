@@ -4,7 +4,7 @@ from typing import Literal
 
 from scheduler.config import GoalProfile
 
-SessionType = Literal["easy", "tempo", "intervals", "long"]
+SessionType = Literal["easy", "tempo", "intervals", "long", "race"]
 
 @dataclass(frozen=True)
 class Runner:
