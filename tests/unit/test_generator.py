@@ -5,6 +5,9 @@ from scheduler.plan import Runner, RaceGoal, Plan
 from scheduler.config import PLAN_5K, DEFAULT_RULES
 
 RACE_DATE = date(2027, 3, 7)
+HARD_SESSIONS = {"tempo", "intervals", "long", "race"}
+QUALITY_SESSIONS = {"tempo", "intervals"}
+
 
 def all_sessions(plan):
     return [s for week in plan.weeks for s in week.sessions]
@@ -145,4 +148,44 @@ def test_day_before_race_is_easy(base_plan):
     day_before = [s for s in all_sessions(base_plan) if s.date == RACE_DATE - timedelta(days=1)]
     assert len(day_before) == 1
     assert day_before[0].session_type == "easy"
+
+def test_no_two_hard_sessions_on_consecutive_days(base_plan):
+    sessions = sorted(all_sessions(base_plan), key=lambda s: s.date)
+    for earlier, later in zip(sessions, sessions[1:]):
+        if later.date - earlier.date == timedelta(days=1):
+            assert not (earlier.session_type in HARD_SESSIONS and later.session_type in HARD_SESSIONS)
+
+@pytest.mark.parametrize(
+    "training_days, expected_quality_max",
+    [
+        ((1, 3, 6), 1),            # 3 days have 1 quality session
+        ((1, 2, 3, 5, 6), 2),      # any more than 3 are capped at 2 quality sessions
+    ]
+)
+def test_quality_sessions_capped_per_week(generator, training_days, expected_quality_max):
+    plan = make_plan(generator, training_days=training_days, long_run_day=6)
+    for week in plan.weeks:
+        quality = [s for s in week.sessions if s.session_type in QUALITY_SESSIONS]
+        assert len(quality) <= expected_quality_max
+
+def test_quality_allowed_with_rest_day_before_long_run(generator):
+    # Mon, Fri, Sun; Sun long run; Fri can be quality bc Sat is rest
+    plan = make_plan(generator, training_days=(0, 4, 6), long_run_day=6)
+    fridays = [s for s in all_sessions(plan) if s.date.weekday() == 4]
+    assert fridays
+    for session in fridays:
+        assert session.session_type in QUALITY_SESSIONS
+
+def test_no_quality_when_training_days_are_bunched(generator):
+    # quality session is skipped if runner trains only 3 day and they're all back to back 
+    plan = make_plan(generator, training_days=(0, 5, 6), long_run_day=6)
+    quality = [s for s in all_sessions(plan) if s.session_type in QUALITY_SESSIONS]
+    assert quality == []
+
+def test_three_day_runner_gets_both_tempo_and_intervals(generator):
+    plan = make_plan(generator, training_days=(1, 3, 6), long_run_day=6)
+    types = {s.session_type for s in all_sessions(plan)}
+    assert "tempo" in types
+    assert "intervals" in types
+
 
