@@ -14,6 +14,15 @@ class Runner:
     training_days: tuple[int, ...]      # 0 = Monday … 6 = Sunday
     long_run_day: int                   # one of training_days
 
+    def __post_init__(self) -> None:
+        if len(self.training_days) < 3:
+            raise ValueError("Choose at least 3 training days per week.")
+        if list(self.training_days) != sorted(set(self.training_days)):
+            raise ValueError("Training days must be in weekday order, without repeats.")
+        if self.long_run_day not in self.training_days:
+            raise ValueError("Long run day must be one of the training days.")
+
+
 @dataclass(frozen=True)
 class RaceGoal:
     """Runners selected training plan and race date"""
