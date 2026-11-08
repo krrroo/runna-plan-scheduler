@@ -6,11 +6,13 @@ class Rules:
     weekly_distance_increase: float
     missed_distance_threshold: float
     taper_weeks_decrease: float
+    max_quality_sessions_per_week: int
 
 DEFAULT_RULES = Rules(
     weekly_distance_increase = 0.1,
     missed_distance_threshold = 0.9,
-    taper_weeks_decrease = 0.2
+    taper_weeks_decrease = 0.2,
+    max_quality_sessions_per_week = 2
 )
 
 @dataclass(frozen=True)
