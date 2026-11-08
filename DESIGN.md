@@ -40,9 +40,9 @@ if actual_km / planned_km < rules.missed_mileage_threshold:
 | `RaceGoal` | profile, race date | What the runner is aiming for, and when |
 | `Session` | date, session type (`Literal["easy", "tempo", "intervals", "long"]`), distance km | One planned run |
 | `Week` | start date, sessions | One week of Sessions; `total_distance()` |
-| `Plan` | race date, weeks | Full training plan, build with Weeks |
+| `Plan` | weeks | Full training plan, built with Weeks |
 | `PlanGenerator` | rules | Builds a plan that respect the rules; `generate_training_plan(runner, goal, start_date)`, `adapt_training_plan()` (TODO: figure out how adaptation works) |
-| Rules | max weekly increase, missed-mileage threshold, etc | Rules that each plan has to meet |
+| `Rules` | max weekly increase, missed-mileage threshold, etc | Rules that each plan has to meet |
 
 ## 4. Goal profiles
 
@@ -56,10 +56,13 @@ if actual_km / planned_km < rules.missed_mileage_threshold:
 
 | Rule | If broken |
 |---|---|
-| Every week has easy/tempo/intervals and a long run | Bug in the generator (caught by tests) |
+| Every week has easy/tempo/intervals and a long run. Long run doesn't have to happen on a partial sątart week or race week. | Bug in the generator (caught by tests) |
+| Race week ends with a race session. | Bug in the generator |
 | No tempo or intervals the day after a long run | Bug in the generator (caught by tests) |
 | Weekly km rises by at most 10% | Bug in the generator (caught by tests) · Warning to the user if they continue after missing mileage |
 | Volume tapers down in the final weeks | Bug in the generator (caught by tests) |
+| Training plan will only be created if race is more than 50% of training plan min week away | Raise error with info for the user |
+| Tempo and intervals will alternate on 3 day plans | Bug in the generator |
 
 
 ## 6. Open questions
