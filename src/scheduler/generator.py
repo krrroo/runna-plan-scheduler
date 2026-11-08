@@ -41,13 +41,15 @@ class PlanGenerator:
             sessions = []
             long_run_date = start + timedelta(days=runner.long_run_day)
 
+            is_race_week = start == race_date_monday
+
             for day in runner.training_days:
                 session_date = start + timedelta(days=day)
                 session_distance = 0.0 #TODO auto distance calc based on rules below
 
                 if session_date < start_date or session_date >= goal.race_date:  # skips sessions before start date and after race date
                     continue
-                elif day == runner.long_run_day and monday_of_week_date(session_date) == race_date_monday: # long session becomes easy on race week
+                elif is_race_week and day == runner.long_run_day:       # long session becomes easy on race week
                     session_type = 'easy'    
                 elif is_day_after(day, runner.long_run_day):            # session after long run must be easy
                     session_type = 'easy'
@@ -55,7 +57,7 @@ class PlanGenerator:
                     session_type = 'easy'
                 elif day == runner.long_run_day:                         # runners chosen long run day
                     session_type = 'long'
-                elif is_day_after(goal.race_date.weekday(), day):                      # session before race must be easy
+                elif is_race_week and is_day_after(goal.race_date.weekday(), day):    # session before race must be easy
                     session_type = 'easy'
                 else:
                     session_type = 'easy'   # TODO: interval,tempo,easy alternating logic
