@@ -31,6 +31,7 @@ def build(week_start=PLAN_START, week_index=0, start_date=PLAN_START, last_hard_
         goal=GOAL,
         max_quality=1,
         last_hard_date=last_hard_date,
+        week_km=0.0,  # distances not used yet (step 4b)
     )
 
 

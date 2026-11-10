@@ -17,6 +17,7 @@ def build_week_sessions(
     goal: RaceGoal,
     max_quality: int,
     last_hard_date: date | None,
+    week_km: float,
 ) -> tuple[tuple[Session, ...], date | None]:
     """Builds one week's sessions and returns them with the updated last hard session date."""
     sessions = []
@@ -25,7 +26,7 @@ def build_week_sessions(
 
     for day in runner.training_days:
         session_date = week_start + timedelta(days=day)
-        session_distance = 0.0  # TODO auto distance calc based on rules below
+        session_distance = 0.0  # TODO (step 4b): split week_km across the week's sessions
 
         if session_date < start_date or session_date >= goal.race_date:
             continue  # skips sessions before start date and after race date

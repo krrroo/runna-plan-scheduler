@@ -4,6 +4,7 @@ from datetime import date, timedelta
 from scheduler.config import DEFAULT_RULES, Rules
 from scheduler.plan import Plan, RaceGoal, Runner, Week
 from scheduler.session_rules import build_week_sessions
+from scheduler.volume import weekly_km_targets  # NEW
 
 
 def monday_of_week_date(d: date) -> date:
@@ -39,6 +40,17 @@ class PlanGenerator:
         else:
             plan_start_date = plan_start_week_monday
 
+        actual_weeks = min(plan_weeks, max_plan_weeks)
+        curve_length = max(actual_weeks, min_plan_weeks)
+        full_curve = weekly_km_targets(
+            curve_length=curve_length,
+            taper_weeks=goal.profile.taper_weeks,
+            peak_km=goal.profile.peak_weekly_km,
+            max_increase=self.rules.weekly_distance_increase,
+            taper_decrease=self.rules.taper_weeks_decrease,
+        )
+        week_targets = full_curve[-actual_weeks:]
+
         week_start = plan_start_date
         weeks = []
         week_index = 0
@@ -54,6 +66,7 @@ class PlanGenerator:
                 goal=goal,
                 max_quality=max_quality,
                 last_hard_date=last_hard_date,
+                week_km=week_targets[week_index],
             )
             weeks.append(Week(start_date=week_start, sessions=sessions))
             week_start += timedelta(weeks=1)
