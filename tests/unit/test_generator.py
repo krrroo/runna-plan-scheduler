@@ -1,3 +1,4 @@
+import itertools
 from datetime import date, timedelta
 
 import pytest
@@ -208,7 +209,7 @@ def test_day_before_race_is_easy(base_plan):
 
 def test_no_two_hard_sessions_on_consecutive_days(base_plan):
     sessions = sorted(all_sessions(base_plan), key=lambda s: s.date)
-    for earlier, later in zip(sessions, sessions[1:]):
+    for earlier, later in itertools.pairwise(sessions):
         if later.date - earlier.date == timedelta(days=1):
             assert not (
                 earlier.session_type in HARD_SESSIONS and later.session_type in HARD_SESSIONS
