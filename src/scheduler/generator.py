@@ -65,7 +65,9 @@ class PlanGenerator:
                     is_race_week and day == runner.long_run_day
                 ):  # long session becomes easy on race week
                     session_type = "easy"
-                elif is_day_after(day, runner.long_run_day) or is_day_after(runner.long_run_day, day):  # session after long run must be easy
+                elif is_day_after(day, runner.long_run_day) or is_day_after(
+                    runner.long_run_day, day
+                ):  # session before or after a long run must be easy
                     session_type = "easy"
                 elif day == runner.long_run_day:  # runners chosen long run day
                     session_type = "long"
