@@ -1,6 +1,8 @@
-import pytest
 from datetime import date, timedelta
-from scheduler.plan import Session, Week, Runner
+
+import pytest
+
+from scheduler.plan import Runner, Session, Week
 
 
 def test_week_total_distance_sums_its_sessions():
@@ -10,17 +12,19 @@ def test_week_total_distance_sums_its_sessions():
         Session(date=date(2026, 12, 12), session_type="long", distance_km=8.0),
     )
     week = Week(start_date=date(2026, 12, 7), sessions=sessions)
-    
+
     total = week.total_distance()
 
     assert total == pytest.approx(19.5)
 
+
 def test_week_total_distance_returns_0_when_no_sessions():
     week = Week(start_date=date(2026, 12, 7), sessions=())
-    
+
     total = week.total_distance()
 
     assert total == 0
+
 
 @pytest.mark.parametrize(
     "training_days, long_run_day, message",
@@ -29,7 +33,7 @@ def test_week_total_distance_returns_0_when_no_sessions():
         ((4, 5, 1), 5, "Training days must be in weekday order"),
         ((1, 3, 3, 6), 6, "Training days must be in weekday order"),
         ((1, 3, 5), 6, "Long run day"),
-    ]
+    ],
 )
 def test_runner_rejects_invalid_training_days(training_days, long_run_day, message):
     with pytest.raises(ValueError, match=message):
@@ -39,6 +43,7 @@ def test_runner_rejects_invalid_training_days(training_days, long_run_day, messa
             training_days=training_days,
             long_run_day=long_run_day,
         )
+
 
 def test_runner_accepts_valid_training_days():
     runner = Runner(
