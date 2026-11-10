@@ -5,9 +5,9 @@ from scheduler.config import DEFAULT_RULES, Rules
 from scheduler.plan import Plan, RaceGoal, Runner, Session, Week
 
 
-def monday_of_week_date(date: date) -> date:
+def monday_of_week_date(d: date) -> date:
     """Returns a Monday of a week from a given date"""
-    return date - timedelta(days=date.weekday())
+    return d - timedelta(days=d.weekday())
 
 
 def weeks_in_plan(start_date: date, end_date: date) -> int:
