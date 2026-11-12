@@ -1,3 +1,8 @@
+def round_to_half(km: float) -> float:
+    """Rounds a distance to the nearest 0.5 km."""
+    return round(km * 2) / 2
+
+
 def weekly_km_targets(
     curve_length: int,
     taper_weeks: int,
@@ -24,3 +29,38 @@ def weekly_km_targets(
         targets.append(km)
 
     return targets
+
+
+def split_week_km(
+    session_types: list[str],
+    week_km: float,
+    long_run_cap: float,
+    session_weights: dict[str, float],
+) -> list[float]:
+    """Splits a week's km across its sessions, in the same order as session_types."""
+    if not session_types:
+        return []
+
+    total_weight = sum(session_weights[t] for t in session_types)
+    distances = [week_km * session_weights[t] / total_weight for t in session_types]
+
+    leftover = 0.0
+    for i, session_type in enumerate(session_types):
+        if session_type == "long" and distances[i] > long_run_cap:
+            leftover += distances[i] - long_run_cap
+            distances[i] = long_run_cap
+
+    other_sessions = [i for i, t in enumerate(session_types) if t != "long"]
+    if leftover > 0 and other_sessions:
+        share = leftover / len(other_sessions)
+        for i in other_sessions:
+            distances[i] += share
+
+    distances = [round_to_half(d) for d in distances]  # round every session, every week
+
+    difference = round_to_half(week_km) - sum(distances)
+    easy_runs = [i for i, t in enumerate(session_types) if t == "easy"]
+    if difference != 0 and easy_runs:
+        distances[easy_runs[0]] += difference
+
+    return distances

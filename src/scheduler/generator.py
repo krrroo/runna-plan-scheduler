@@ -67,6 +67,7 @@ class PlanGenerator:
                 max_quality=max_quality,
                 last_hard_date=last_hard_date,
                 week_km=week_targets[week_index],
+                session_weights=self.rules.session_weights,
             )
             weeks.append(Week(start_date=week_start, sessions=sessions))
             week_start += timedelta(weeks=1)

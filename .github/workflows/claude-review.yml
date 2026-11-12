@@ -31,5 +31,9 @@ jobs:
           prompt: |
             REPO: ${{ github.repository }}
             PR NUMBER: ${{ github.event.pull_request.number }}
-            Review this pull request following CLAUDE.md.
+            Review this pull request following CLAUDE.md. Read the changes with `gh pr diff`.
+            Post specific issues as inline comments using the inline comment tool.
+            Always finish by posting a summary with
+            `gh pr comment ${{ github.event.pull_request.number }} --body "<your summary>"`,
+            even if you found nothing important. Your final message is not visible to anyone.
           claude_args: '--model sonnet --max-turns 8 --allowedTools "mcp__github_inline_comment__create_inline_comment,Bash(gh pr comment:*),Bash(gh pr diff:*),Bash(gh pr view:*)"'
