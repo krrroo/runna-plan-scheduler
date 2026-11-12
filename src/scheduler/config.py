@@ -9,6 +9,7 @@ class Rules:
     missed_distance_threshold: float
     taper_weeks_decrease: float
     max_quality_sessions_per_week: int
+    session_weights: dict[str, float]
 
 
 DEFAULT_RULES = Rules(
@@ -16,6 +17,7 @@ DEFAULT_RULES = Rules(
     missed_distance_threshold=0.9,
     taper_weeks_decrease=0.2,
     max_quality_sessions_per_week=2,
+    session_weights={"long": 2, "tempo": 1, "intervals": 1, "easy": 1},
 )
 
 

@@ -2,7 +2,7 @@ from datetime import date, timedelta
 
 import pytest
 
-from scheduler.config import PLAN_5K
+from scheduler.config import DEFAULT_RULES, PLAN_5K
 from scheduler.plan import RaceGoal, Runner
 from scheduler.session_rules import build_week_sessions, is_day_after
 
@@ -31,7 +31,8 @@ def build(week_start=PLAN_START, week_index=0, start_date=PLAN_START, last_hard_
         goal=GOAL,
         max_quality=1,
         last_hard_date=last_hard_date,
-        week_km=0.0,  # distances not used yet (step 4b)
+        week_km=0.0,
+        session_weights=DEFAULT_RULES.session_weights,
     )
 
 
