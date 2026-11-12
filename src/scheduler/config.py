@@ -31,6 +31,10 @@ class GoalProfile:
     peak_weekly_km: float
     peak_long_run_km: float
 
+    def __post_init__(self) -> None:
+        if self.taper_weeks >= self.min_weeks:
+            raise ValueError("Plan must be longer than taper weeks length.")
+
 
 PLAN_5K = GoalProfile(
     name="5k",
