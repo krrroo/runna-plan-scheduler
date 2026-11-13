@@ -1,7 +1,7 @@
 import pytest
 
 from scheduler.config import DEFAULT_RULES
-from scheduler.volume import round_to_half, split_week_km, weekly_km_targets
+from scheduler.distances import round_to_half, split_week_km, weekly_km_targets
 
 WEIGHTS = {"long": 2, "tempo": 1, "intervals": 1, "easy": 1}
 
