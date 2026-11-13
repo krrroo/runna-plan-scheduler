@@ -10,7 +10,6 @@ class Rules:
     taper_weeks_decrease: float
     max_quality_sessions_per_week: int
     min_session_km: float
-    easy_variation_km: float
     session_weights: dict[str, float]
 
 
@@ -20,7 +19,6 @@ DEFAULT_RULES = Rules(
     taper_weeks_decrease=0.2,
     max_quality_sessions_per_week=2,
     min_session_km=3.5,
-    easy_variation_km=0.5,
     session_weights={"long": 2, "tempo": 1, "intervals": 1, "easy": 1},
 )
 

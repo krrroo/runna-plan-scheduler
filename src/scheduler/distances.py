@@ -1,3 +1,14 @@
+from dataclasses import dataclass
+
+
+@dataclass(frozen=True)
+class WeekDistances:
+    long_km: float
+    easy_km: float
+    tempo_km: float
+    intervals_km: float
+
+
 def round_to_half(km: float) -> float:
     """Rounds a distance to the nearest 0.5 km."""
     return round(km * 2) / 2
