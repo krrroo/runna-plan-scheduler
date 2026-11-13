@@ -2,9 +2,9 @@ from dataclasses import dataclass
 from datetime import date, timedelta
 
 from scheduler.config import DEFAULT_RULES, Rules
+from scheduler.distances import weekly_km_targets  # NEW
 from scheduler.plan import Plan, RaceGoal, Runner, Week
 from scheduler.session_rules import build_week_sessions
-from scheduler.distances import weekly_km_targets  # NEW
 
 
 def monday_of_week_date(d: date) -> date:

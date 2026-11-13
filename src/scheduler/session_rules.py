@@ -1,7 +1,7 @@
 from datetime import date, timedelta
 
-from scheduler.plan import RaceGoal, Runner, Session
 from scheduler.distances import split_week_km
+from scheduler.plan import RaceGoal, Runner, Session
 
 
 def is_day_after(day1: int, day2: int) -> bool:
