@@ -2,7 +2,8 @@ from datetime import date, timedelta
 
 import pytest
 
-from scheduler.config import DEFAULT_RULES, PLAN_5K
+from scheduler.config import PLAN_5K
+from scheduler.distances import WeekDistances
 from scheduler.plan import RaceGoal, Runner
 from scheduler.session_rules import build_week_sessions, is_day_after
 
@@ -10,6 +11,7 @@ RACE_DATE = date(2027, 3, 7)  # Sunday
 RACE_WEEK_MONDAY = date(2027, 3, 1)
 PLAN_START = date(2026, 12, 14)  # Monday
 GOAL = RaceGoal(race_date=RACE_DATE, profile=PLAN_5K)
+DISTANCES = WeekDistances(long_km=10.0, easy_km=5.0, tempo_km=4.5, intervals_km=4.0)
 
 
 def make_runner(training_days=(1, 3, 6), long_run_day=6):
@@ -31,8 +33,7 @@ def build(week_start=PLAN_START, week_index=0, start_date=PLAN_START, last_hard_
         goal=GOAL,
         max_quality=1,
         last_hard_date=last_hard_date,
-        week_km=0.0,
-        session_weights=DEFAULT_RULES.session_weights,
+        distances=DISTANCES,
     )
 
 
@@ -60,9 +61,15 @@ def test_normal_week_gets_quality_easy_and_long():
     assert last_hard_date == date(2026, 12, 20)  # the Sunday long run
 
 
+def test_sessions_get_their_types_distance():
+    sessions, _ = build()
+    assert [s.distance_km for s in sessions] == [4.5, 5.0, 10.0]  # tempo, easy, long
+
+
 def test_odd_week_index_gives_intervals():
     sessions, _ = build(week_index=1)
     assert types_of(sessions)[0] == "intervals"
+    assert sessions[0].distance_km == 4.0
 
 
 def test_hard_day_from_previous_week_blocks_quality_next_day():

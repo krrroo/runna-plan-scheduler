@@ -16,5 +16,9 @@ Review only the PR diff. Report only:
 2. **Missing tests**: a new branch or edge case with no test that would catch a regression.
 3. **Design risks**: choices that would block pace calculation, plan adaptation or new goal types.
 
+Post one inline comment per issue, attached to the line in the diff where the problem is.
+If an issue has no single line (for example, a missing test or a design concern across files),
+put it in the summary comment instead of an inline comment.
+
 Skip nits, style and formatting (Ruff enforces them) and test results (pytest runs in CI).
 If there's nothing important, post a one-line summary saying so.

@@ -1,7 +1,7 @@
 from datetime import date, timedelta
 
+from scheduler.distances import WeekDistances, round_to_half
 from scheduler.plan import RaceGoal, Runner, Session
-from scheduler.volume import split_week_km
 
 
 def is_day_after(day1: int, day2: int) -> bool:
@@ -18,14 +18,18 @@ def build_week_sessions(
     goal: RaceGoal,
     max_quality: int,
     last_hard_date: date | None,
-    week_km: float,
-    session_weights: dict[str, float],
+    distances: WeekDistances,
 ) -> tuple[tuple[Session, ...], date | None]:
     """Builds one week's sessions and returns them with the updated last hard session date."""
     sessions = []
-    planned = []
     quality_count = 0
     is_race_week = week_start == race_date_monday
+    km_by_type = {
+        "long": distances.long_km,
+        "tempo": distances.tempo_km,
+        "intervals": distances.intervals_km,
+        "easy": distances.easy_km,
+    }
 
     for day in runner.training_days:
         session_date = week_start + timedelta(days=day)
@@ -48,23 +52,13 @@ def build_week_sessions(
         else:
             session_type = "easy"
 
-        planned.append((session_date, session_type))
-
-    target_km = week_km
-    if week_start < start_date:
-        target_km = week_km * len(planned) / len(runner.training_days)
-
-    types = [session_type for _, session_type in planned]
-    distances = split_week_km(
-        session_types=types,
-        week_km=target_km,
-        long_run_cap=goal.profile.peak_long_run_km,
-        session_weights=session_weights,
-    )
-    sessions = [
-        Session(date=session_date, session_type=session_type, distance_km=km)
-        for (session_date, session_type), km in zip(planned, distances)
-    ]
+        sessions.append(
+            Session(
+                date=session_date,
+                session_type=session_type,
+                distance_km=round_to_half(km_by_type[session_type]),
+            )
+        )
 
     if is_race_week:
         sessions.append(

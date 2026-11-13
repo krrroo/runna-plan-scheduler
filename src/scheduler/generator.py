@@ -2,9 +2,9 @@ from dataclasses import dataclass
 from datetime import date, timedelta
 
 from scheduler.config import DEFAULT_RULES, Rules
+from scheduler.distances import WeekDistances, progression
 from scheduler.plan import Plan, RaceGoal, Runner, Week
 from scheduler.session_rules import build_week_sessions
-from scheduler.volume import weekly_km_targets  # NEW
 
 
 def monday_of_week_date(d: date) -> date:
@@ -40,16 +40,42 @@ class PlanGenerator:
         else:
             plan_start_date = plan_start_week_monday
 
+        # One progression curve per session type. Runners with fewer than min_weeks
+        # get the last part of a min_weeks-long curve, as if they had started earlier.
+        profile = goal.profile
         actual_weeks = min(plan_weeks, max_plan_weeks)
         curve_length = max(actual_weeks, min_plan_weeks)
-        full_curve = weekly_km_targets(
+        taper_decrease = self.rules.taper_weeks_decrease
+
+        # TODO: simplify this design to have one call
+        long_curve = progression(
             curve_length=curve_length,
-            taper_weeks=goal.profile.taper_weeks,
-            peak_km=goal.profile.peak_weekly_km,
-            max_increase=self.rules.weekly_distance_increase,
-            taper_decrease=self.rules.taper_weeks_decrease,
-        )
-        week_targets = full_curve[-actual_weeks:]
+            taper_weeks=profile.taper_weeks,
+            start_km=profile.long_run_start_km,
+            peak_km=profile.long_run_peak_km,
+            taper_decrease=taper_decrease,
+        )[-actual_weeks:]
+        easy_curve = progression(
+            curve_length=curve_length,
+            taper_weeks=profile.taper_weeks,
+            start_km=profile.easy_start_km,
+            peak_km=profile.easy_peak_km,
+            taper_decrease=taper_decrease,
+        )[-actual_weeks:]
+        tempo_curve = progression(
+            curve_length=curve_length,
+            taper_weeks=profile.taper_weeks,
+            start_km=profile.tempo_start_km,
+            peak_km=profile.tempo_peak_km,
+            taper_decrease=taper_decrease,
+        )[-actual_weeks:]
+        intervals_curve = progression(
+            curve_length=curve_length,
+            taper_weeks=profile.taper_weeks,
+            start_km=profile.intervals_start_km,
+            peak_km=profile.intervals_peak_km,
+            taper_decrease=taper_decrease,
+        )[-actual_weeks:]
 
         week_start = plan_start_date
         weeks = []
@@ -57,6 +83,12 @@ class PlanGenerator:
         last_hard_date = None
 
         while week_start <= race_date_monday:
+            distances = WeekDistances(
+                long_km=long_curve[week_index],
+                easy_km=easy_curve[week_index],
+                tempo_km=tempo_curve[week_index],
+                intervals_km=intervals_curve[week_index],
+            )
             sessions, last_hard_date = build_week_sessions(
                 week_start=week_start,
                 week_index=week_index,
@@ -66,8 +98,7 @@ class PlanGenerator:
                 goal=goal,
                 max_quality=max_quality,
                 last_hard_date=last_hard_date,
-                week_km=week_targets[week_index],
-                session_weights=self.rules.session_weights,
+                distances=distances,
             )
             weeks.append(Week(start_date=week_start, sessions=sessions))
             week_start += timedelta(weeks=1)
