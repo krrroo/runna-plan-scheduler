@@ -21,7 +21,7 @@ def progression(curve_length, taper_weeks, start_km, peak_km, taper_decrease) ->
     week before the taper, then drop by taper_decrease each taper week.
     """
     peak_index = curve_length - taper_weeks - 1
-    step_change = (peak_km - start_km) / peak_index
+    step_change = (peak_km - start_km) / peak_index if peak_index > 0 else 0.0
 
     targets = []
 

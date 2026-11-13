@@ -268,3 +268,11 @@ def test_no_session_below_minimum_disance(generator):
     for week in plan.weeks[: -PLAN_5K.taper_weeks]:
         for session in week.sessions:
             assert session.distance_km >= DEFAULT_RULES.min_session_km
+
+
+def test_short_plan_starts_partway_along_the_curve(generator):
+    plan = make_plan(
+        generator, training_days=(1, 3, 6), long_run_day=6, start_date=date(2027, 1, 24)
+    )
+    first_long = next(s for s in all_sessions(plan) if s.session_type == "long")
+    assert first_long.distance_km == 5.5
