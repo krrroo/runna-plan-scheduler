@@ -11,6 +11,7 @@ class Rules:
     max_quality_sessions_per_week: int
     min_session_km: float
     easy_variation_km: float
+    session_weights: dict[str, float]
 
 
 DEFAULT_RULES = Rules(
@@ -20,6 +21,7 @@ DEFAULT_RULES = Rules(
     max_quality_sessions_per_week=2,
     min_session_km=3.5,
     easy_variation_km=0.5,
+    session_weights={"long": 2, "tempo": 1, "intervals": 1, "easy": 1},
 )
 
 
@@ -40,6 +42,8 @@ class GoalProfile:
     tempo_peak_km: float
     intervals_start_km: float
     intervals_peak_km: float
+    peak_weekly_km: float
+    peak_long_run_km: float
 
     def __post_init__(self) -> None:
         if self.taper_weeks >= self.min_weeks:
@@ -60,6 +64,8 @@ PLAN_5K = GoalProfile(
     tempo_peak_km=4.5,
     intervals_start_km=3.5,
     intervals_peak_km=4.0,
+    peak_weekly_km=25.0,
+    peak_long_run_km=9.0,
 )
 
 PLAN_10K = GoalProfile(
@@ -76,6 +82,8 @@ PLAN_10K = GoalProfile(
     tempo_peak_km=5.5,
     intervals_start_km=3.5,
     intervals_peak_km=5.0,
+    peak_weekly_km=30.0,
+    peak_long_run_km=13.0,
 )
 
 PLAN_HALF_MARATHON = GoalProfile(
@@ -92,4 +100,6 @@ PLAN_HALF_MARATHON = GoalProfile(
     tempo_peak_km=6.5,
     intervals_start_km=4.0,
     intervals_peak_km=6.0,
+    peak_weekly_km=38.0,
+    peak_long_run_km=18.0,
 )
