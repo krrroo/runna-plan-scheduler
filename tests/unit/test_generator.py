@@ -251,3 +251,20 @@ def test_three_day_runner_gets_both_tempo_and_intervals(generator):
     types = {s.session_type for s in all_sessions(plan)}
     assert "tempo" in types
     assert "intervals" in types
+
+
+def test_long_run_the_same_across_different_training_days(generator):
+    three_day_plan = make_plan(generator, training_days=(1, 3, 6), long_run_day=6)
+    six_day_plan = make_plan(generator, training_days=(0, 1, 2, 3, 5, 6), long_run_day=6)
+
+    def long_runs(plan):
+        return [s.distance_km for s in all_sessions(plan) if s.session_type == "long"]
+
+    assert long_runs(three_day_plan) == long_runs(six_day_plan)
+
+
+def test_no_session_below_minimum_disance(generator):
+    plan = make_plan(generator, training_days=(0, 1, 2, 3, 5, 6), long_run_day=6)
+    for week in plan.weeks[: -PLAN_5K.taper_weeks]:
+        for session in week.sessions:
+            assert session.distance_km >= DEFAULT_RULES.min_session_km
