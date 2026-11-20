@@ -27,14 +27,38 @@ def test_week_total_distance_returns_0_when_no_sessions():
     assert total == 0
 
 
-def test_week_actual_distance_returns_sum(week):
-    runs = [
-        CompletedRun(date=date(2026, 12, 8), distance_km=5.1),
-        CompletedRun(date=date(2026, 12, 10), distance_km=6.3),
-        CompletedRun(date=date(2026, 12, 12), distance_km=8.03),
-    ]
+@pytest.mark.parametrize(
+    "runs, actual_sum",
+    [
+        (
+            [
+                CompletedRun(date=date(2026, 12, 8), distance_km=5.1),
+                CompletedRun(date=date(2026, 12, 10), distance_km=6.3),
+                CompletedRun(date=date(2026, 12, 12), distance_km=8.03),
+            ],
+            19.43,
+        ),
+        (
+            [
+                CompletedRun(date=date(2026, 11, 8), distance_km=5.1),
+                CompletedRun(date=date(2026, 11, 10), distance_km=6.3),
+                CompletedRun(date=date(2026, 11, 12), distance_km=8.03),
+            ],
+            0,
+        ),
+        (
+            [
+                CompletedRun(date=date(2026, 12, 8), distance_km=5.1),
+                CompletedRun(date=date(2026, 12, 10), distance_km=6.3),
+                CompletedRun(date=date(2026, 11, 12), distance_km=8.03),
+            ],
+            11.4,
+        ),
+    ],
+)
+def test_week_actual_distance_returns_correct_sum(week, runs, actual_sum):
     actual = week.total_actual_distance(runs=runs)
-    assert actual == 19.43
+    assert actual == pytest.approx(actual_sum)
 
 
 def test_week_actual_distance_returns_zero(week):
