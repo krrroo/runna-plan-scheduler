@@ -5,7 +5,7 @@ import pytest
 
 from scheduler.config import DEFAULT_RULES, PLAN_5K
 from scheduler.generator import PlanGenerator, monday_of_week_date, weeks_in_plan
-from scheduler.plan import Plan, RaceGoal, Runner
+from scheduler.plan import CompletedRun, Plan, RaceGoal, Runner, Session, Week
 
 RACE_DATE = date(2027, 3, 7)
 HARD_SESSIONS = {"tempo", "intervals", "long", "race"}
@@ -48,6 +48,17 @@ def generator():
 def base_plan(runner, generator):
     goal = RaceGoal(race_date=date(2027, 3, 7), profile=PLAN_5K)
     return generator.generate_training_plan(runner=runner, goal=goal, start_date=date(2026, 12, 14))
+
+
+@pytest.fixture
+def week():
+    sessions = (
+        Session(date=date(2026, 12, 8), session_type="easy", distance_km=5.0),
+        Session(date=date(2026, 12, 10), session_type="tempo", distance_km=6.5),
+        Session(date=date(2026, 12, 12), session_type="long", distance_km=8.0),
+    )
+    week = Week(start_date=date(2026, 12, 7), sessions=sessions)
+    return week
 
 
 @pytest.mark.parametrize(
@@ -276,3 +287,29 @@ def test_short_plan_starts_partway_along_the_curve(generator):
     )
     first_long = next(s for s in all_sessions(plan) if s.session_type == "long")
     assert first_long.distance_km == 5.5
+
+
+@pytest.mark.parametrize(
+    "runs, expected",
+    [
+        (
+            [
+                CompletedRun(date=date(2026, 12, 8), distance_km=4.1),
+                CompletedRun(date=date(2026, 12, 10), distance_km=5.3),
+                CompletedRun(date=date(2026, 12, 12), distance_km=6.03),
+            ],
+            True,
+        ),
+        (
+            [
+                CompletedRun(date=date(2026, 12, 8), distance_km=5.1),
+                CompletedRun(date=date(2026, 12, 10), distance_km=6.8),
+                CompletedRun(date=date(2026, 12, 12), distance_km=8.03),
+            ],
+            False,
+        ),
+    ],
+    ids=["shortfall", "on_target"],
+)
+def test_is_shortfall(generator, week, runs, expected):
+    assert generator.is_shortfall(week, runs) == expected

@@ -3,7 +3,7 @@ from datetime import date, timedelta
 
 from scheduler.config import DEFAULT_RULES, Rules
 from scheduler.distances import WeekDistances, progression
-from scheduler.plan import Plan, RaceGoal, Runner, Week
+from scheduler.plan import CompletedRun, Plan, RaceGoal, Runner, Week
 from scheduler.session_rules import build_week_sessions
 
 
@@ -106,6 +106,13 @@ class PlanGenerator:
 
         return Plan(weeks=tuple(weeks))
 
+    def is_shortfall(self, week: Week, runs: list[CompletedRun]) -> bool:
+        """Checks if runner is behind distance threshold."""
+        return (
+            week.total_actual_distance(runs) / week.total_plan_distance()
+            < self.rules.missed_distance_threshold
+        )
+
     def adapt_training_plan(
-        self, plan: Plan, runner: Runner, goal: RaceGoal, actual_km: float
+        self, plan: Plan, runner: Runner, goal: RaceGoal, runs: list[CompletedRun]
     ) -> Plan: ...
