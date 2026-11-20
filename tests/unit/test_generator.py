@@ -364,8 +364,9 @@ def test_adapting_twice_compounds(generator, base_plan):
     for once_week, twice_week in zip(once.weeks[7:], twice.weeks[7:]):
         assert twice_week.total_plan_distance() < once_week.total_plan_distance()
 
+
 def test_day_before_monday_race_is_easy(generator):
-    #found by hypothesis testing - the day before a Monday race is in the previous week and would get quality session
+    # found by hypothesis testing - the day before a Monday race is in the previous week and would get quality session
     race_date = date(2027, 3, 8)
     plan = make_plan(generator, training_days=(1, 2, 6), long_run_day=1, race_date=race_date)
     day_before = [s for s in all_sessions(plan) if s.date == race_date - timedelta(days=1)]
