@@ -82,3 +82,49 @@ def test_no_back_to_back_hard_sessions(runner, inputs):
             assert not (
                 earlier.session_type in HARD_SESSIONS and later.session_type in HARD_SESSIONS
             ), f"Hard sessions back to back: {earlier} then {later}"
+
+
+@given(runners(), plan_inputs())
+def test_no_sessions_after_race_date(runner, inputs):
+    goal, _ = inputs
+    plan = build_plan(runner, inputs)
+    sessions = all_sessions(plan)
+    race = [s for s in sessions if s.session_type == "race"]
+
+    assert len(race) == 1
+    assert race[0].date == goal.race_date
+    assert all(s.date <= goal.race_date for s in sessions)
+
+
+@given(runners(), plan_inputs())
+def test_no_sessions_after_race(runner, inputs):
+    plan = build_plan(runner, inputs)
+    goal, _ = inputs
+    assert all(session.date <= goal.race_date for session in all_sessions(plan))
+
+
+@given(runners(), plan_inputs())
+def test_no_sessions_before_start_date(runner, inputs):
+    plan = build_plan(runner, inputs)
+    _, start_date = inputs
+    assert all(session.date >= start_date for session in all_sessions(plan))
+
+
+@given(runners(), plan_inputs())
+def test_no_plan_is_longer_than_max_weeks(runner, inputs):
+    plan = build_plan(runner, inputs)
+    goal, _ = inputs
+    assert len(plan.weeks) <= goal.profile.max_weeks
+
+
+@given(runners(), plan_inputs())
+def test_intervals_not_longer_than_tempo_not_longer_than_easy(runner, inputs):
+    plan = build_plan(runner, inputs)
+    for week in plan.weeks:
+        km = {session.session_type: session.distance_km for session in week.sessions}
+        if "intervals" in km and "tempo" in km:
+            assert km["intervals"] <= km["tempo"]
+        if "tempo" in km and "easy" in km:
+            assert km["tempo"] <= km["easy"]
+        if "intervals" in km and "easy" in km:
+            assert km["intervals"] <= km["easy"]
