@@ -43,15 +43,28 @@ class Session:
 
 
 @dataclass(frozen=True)
+class CompletedRun:
+    """Tracks runners actual distance per run"""
+
+    date: date
+    distance_km: float
+
+
+@dataclass(frozen=True)
 class Week:
     """7 days in a training plan, built from Sessions"""
 
     start_date: date
     sessions: tuple[Session, ...]
 
-    def total_distance(self) -> float:
+    def total_plan_distance(self) -> float:
         """Returns weeks total distance in kms"""
         return sum(session.distance_km for session in self.sessions)
+
+    def total_actual_distance(self, runs: list[CompletedRun]) -> float:
+        """Returns weeks actual distance in kms"""
+        week_end = self.start_date + timedelta(days=7)
+        return sum(r.distance_km for r in runs if self.start_date <= r.date < week_end)
 
 
 @dataclass(frozen=True)
