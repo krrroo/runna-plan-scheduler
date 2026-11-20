@@ -17,16 +17,17 @@ generator = PlanGenerator(rules)
 plan = generator.generate_training_plan(runner, goal, start_date=date(2026, 12, 7))
 
 week = plan.weeks[0]
-print(week.total_distance())
+print(week.total_plan_distance())
 
 # after a week of training
-actual_km = 18.0  # passed in for now, but idea is that app collects it
-planned_km = week.total_distance()
+runs = [
+    CompletedRun(date=date(2026, 12, 8), distance_km=4.0)
+]  # passed in for now, but idea is that app collects it
 user_wants_update = True  # the runner's decision
 
-if actual_km / planned_km < rules.missed_mileage_threshold:
+if generator.is_shortfall(week, runs):
     if user_wants_update:
-        plan = generator.adapt_training_plan(plan, runner, goal, actual_km)
+        plan = generator.adapt_training_plan(plan, week_index=0, runs=runs)
     else:
         print(
             "Warning: next week jumps more than 10% above what you ran. Continue at your own risk."
@@ -41,12 +42,13 @@ if actual_km / planned_km < rules.missed_mileage_threshold:
 | `GoalProfile` | distance, min/max weeks, taper weeks, start and peak km for long run, easy, tempo and intervals | The coach's training plan characteristics |
 | `RaceGoal` | profile, race date | What the runner is aiming for, and when |
 | `Session` | date, session type (`Literal["easy", "tempo", "intervals", "long", "race"]`), distance km | One planned run |
-| `Week` | start date, sessions | One week of Sessions; `total_distance()` |
+| `Week` | start date, sessions | One week of Sessions; `total_plan_distance()`, `total_actual_distance(runs)` |
 | `Plan` | weeks | Full training plan, built with Weeks |
 | `WeekDistances` | long, easy, tempo and intervals km for one week | The distance each session type gets that week |
-| `PlanGenerator` | rules | Builds a plan that respect the rules; `generate_training_plan(runner, goal, start_date)`, `adapt_training_plan()` (TODO: figure out how adaptation works) |
-| `Rules` | max weekly increase, missed-mileage threshold, etc | Rules that each plan has to meet |
-
+| `CompletedRun` | date, distance km | A run the runner actually did (activity log, kept separate from the plan) |
+| `PlanGenerator` | rules | Builds a plan that respect the rules; `generate_training_plan(runner, goal, start_date)`, `is_shortfall(week, runs)`, `adapt_training_plan(plan, week_index, runs)` |
+| `Rules` | max weekly increase, missed-mileage threshold, max adapt decrease, etc | Rules that each plan has to meet |
+ 
 ## 4. Goal profiles
 
 | Profile | Weeks | Taper weeks | Long run km | Easy km | Tempo km | Intervals km |
@@ -69,13 +71,16 @@ Each session type progresses in equal steps from its start to its peak (start �
 | Training plan will only be created if race is more than 50% of training plan min week away | Raise error with info for the user |
 | Tempo and intervals will alternate on 3 day plans | Bug in the generator |
 | Intervals ≤ tempo ≤ easy distance, every week | Config error (caught by tests) |
-| No session below 3.5 km outside the taper | Config error (caught by tests) |
+| No session below 3.5 km outside the taper, in generated plans (adapted plans may go below) | Config error (caught by tests) |
 | Long run is the same for every runner on the same plan, whatever their training days | Bug in the generator (caught by tests) |
+| Runner is offered adaptation only if they completed under 90% of a week's planned km, and only adapts if they choose to | `is_shortfall` returns False · no adaptation offered |
+| Adapting cuts each later week's total by at most 20%; long runs and the race stay the same; the missed week and earlier weeks are unchanged | Bug in the generator (caught by tests) |
+| Adaptation called without a shortfall | Raise error |
  
  
 ## 6. Open questions
 
-- How should the plan update after missed mileage?
 - Pace suggestions: where and how are they calculated?
 - What happens when a plan breaks the 10% weekly rule?
+- Limit adaptation: max number of adaptations, minimum weeks between them, or a floor relative to the original plan?
  

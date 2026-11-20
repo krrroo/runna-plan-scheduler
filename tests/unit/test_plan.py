@@ -2,28 +2,69 @@ from datetime import date, timedelta
 
 import pytest
 
-from scheduler.plan import Runner, Session, Week
+from scheduler.plan import CompletedRun, Runner, Session, Week
 
 
-def test_week_total_distance_sums_its_sessions():
+@pytest.fixture
+def week():
     sessions = (
         Session(date=date(2026, 12, 8), session_type="easy", distance_km=5.0),
         Session(date=date(2026, 12, 10), session_type="tempo", distance_km=6.5),
         Session(date=date(2026, 12, 12), session_type="long", distance_km=8.0),
     )
     week = Week(start_date=date(2026, 12, 7), sessions=sessions)
+    return week
 
-    total = week.total_distance()
 
+def test_week_total_distance_sums_its_sessions(week):
+    total = week.total_plan_distance()
     assert total == pytest.approx(19.5)
 
 
 def test_week_total_distance_returns_0_when_no_sessions():
     week = Week(start_date=date(2026, 12, 7), sessions=())
-
-    total = week.total_distance()
-
+    total = week.total_plan_distance()
     assert total == 0
+
+
+@pytest.mark.parametrize(
+    "runs, actual_sum",
+    [
+        (
+            [
+                CompletedRun(date=date(2026, 12, 8), distance_km=5.1),
+                CompletedRun(date=date(2026, 12, 10), distance_km=6.3),
+                CompletedRun(date=date(2026, 12, 12), distance_km=8.03),
+            ],
+            19.43,
+        ),
+        (
+            [
+                CompletedRun(date=date(2026, 11, 8), distance_km=5.1),
+                CompletedRun(date=date(2026, 11, 10), distance_km=6.3),
+                CompletedRun(date=date(2026, 11, 12), distance_km=8.03),
+            ],
+            0,
+        ),
+        (
+            [
+                CompletedRun(date=date(2026, 12, 8), distance_km=5.1),
+                CompletedRun(date=date(2026, 12, 10), distance_km=6.3),
+                CompletedRun(date=date(2026, 11, 12), distance_km=8.03),
+            ],
+            11.4,
+        ),
+    ],
+)
+def test_week_actual_distance_returns_correct_sum(week, runs, actual_sum):
+    actual = week.total_actual_distance(runs=runs)
+    assert actual == pytest.approx(actual_sum)
+
+
+def test_week_actual_distance_returns_zero(week):
+    runs = []
+    actual = week.total_actual_distance(runs=runs)
+    assert actual == 0
 
 
 @pytest.mark.parametrize(

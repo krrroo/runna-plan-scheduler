@@ -10,6 +10,8 @@ class Rules:
     taper_weeks_decrease: float
     max_quality_sessions_per_week: int
     min_session_km: float
+    max_adapt_decrease: float
+    min_adapt_session_scale: float
 
 
 DEFAULT_RULES = Rules(
@@ -18,6 +20,8 @@ DEFAULT_RULES = Rules(
     taper_weeks_decrease=0.2,
     max_quality_sessions_per_week=2,
     min_session_km=3.5,
+    max_adapt_decrease=0.2,
+    min_adapt_session_scale=0.5,
 )
 
 
