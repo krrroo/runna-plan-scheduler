@@ -20,7 +20,9 @@ week = plan.weeks[0]
 print(week.total_plan_distance())
 
 # after a week of training
-runs = [CompletedRun(date=date(2026, 12, 8), distance_km=4.0)]  # passed in for now, but idea is that app collects it
+runs = [
+    CompletedRun(date=date(2026, 12, 8), distance_km=4.0)
+]  # passed in for now, but idea is that app collects it
 user_wants_update = True  # the runner's decision
 
 if generator.is_shortfall(week, runs):

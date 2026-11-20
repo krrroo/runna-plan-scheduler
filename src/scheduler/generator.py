@@ -108,10 +108,10 @@ class PlanGenerator:
 
     def is_shortfall(self, week: Week, runs: list[CompletedRun]) -> bool:
         """Checks if runner is behind distance threshold."""
-        return (
-            week.total_actual_distance(runs) / week.total_plan_distance()
-            < self.rules.missed_distance_threshold
-        )
+        planned = week.total_plan_distance()
+        if planned == 0:
+            return False
+        return week.total_actual_distance(runs) / planned < self.rules.missed_distance_threshold
 
     def adapt_training_plan(self, plan: Plan, week_index: int, runs: list[CompletedRun]) -> Plan:
         """Adapts training plan from a given week onwards, based on missed distance ratio or max adapt decrease."""
@@ -125,17 +125,15 @@ class PlanGenerator:
 
         adapted_weeks = []
         for week in plan.weeks[week_index + 1 :]:
-            week_total = week.total_plan_distance()
-            fixed_dist = sum(
-                session.distance_km
-                for session in week.sessions
-                if session.session_type in {"long", "race"}
-            )
-            scale = (
-                max(0.0, (week_total * ratio - fixed_dist) / (week_total - fixed_dist))
-                if week_total - fixed_dist > 0
-                else 1.0
-            )
+            training_km = sum(s.distance_km for s in week.sessions if s.session_type != "race")
+            long_km = sum(s.distance_km for s in week.sessions if s.session_type == "long")
+            flexible_km = training_km - long_km
+
+            if flexible_km > 0:
+                scale = (training_km * ratio - long_km) / flexible_km
+                scale = max(self.rules.min_adapt_session_scale, scale)
+            else:
+                scale = 1.0
 
             new_sessions = []
             for session in week.sessions:
