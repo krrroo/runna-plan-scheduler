@@ -86,4 +86,5 @@ Plan rules are checked by unit tests and by Hypothesis property tests.
 - Pace suggestions: where and how are they calculated?
 - What happens when a plan breaks the 10% weekly rule?
 - Limit adaptation: max number of adaptations, minimum weeks between them, or a floor relative to the original plan?
+- Before a Monday race with a Sunday long-run day, the week before loses its long run. Move it to an earlier training day instead?
  
