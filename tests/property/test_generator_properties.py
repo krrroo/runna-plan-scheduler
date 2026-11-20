@@ -97,13 +97,6 @@ def test_no_sessions_after_race_date(runner, inputs):
 
 
 @given(runners(), plan_inputs())
-def test_no_sessions_after_race(runner, inputs):
-    plan = build_plan(runner, inputs)
-    goal, _ = inputs
-    assert all(session.date <= goal.race_date for session in all_sessions(plan))
-
-
-@given(runners(), plan_inputs())
 def test_no_sessions_before_start_date(runner, inputs):
     plan = build_plan(runner, inputs)
     _, start_date = inputs
