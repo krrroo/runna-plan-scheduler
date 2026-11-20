@@ -29,6 +29,10 @@ def make_plan(
     return generator.generate_training_plan(runner=runner, goal=goal, start_date=start_date)
 
 
+def runs_for_week_with_ratio(week, ratio=float):
+    return [CompletedRun(date=s.date, distance_km=s.distance_km * ratio) for s in week.sessions]
+
+
 @pytest.fixture(params=[6, 5], ids=["sunday_long_run", "saturday_long_run"])
 def runner(request):
     return Runner(
@@ -313,3 +317,49 @@ def test_short_plan_starts_partway_along_the_curve(generator):
 )
 def test_is_shortfall(generator, week, runs, expected):
     assert generator.is_shortfall(week, runs) == expected
+
+
+def test_adapt_plan_raises_error_when_not_needed(generator, base_plan):
+    runs = runs_for_week_with_ratio(base_plan.weeks[4], 1.1)
+    with pytest.raises(ValueError, match="Adaptation is only for distance shortfall"):
+        generator.adapt_training_plan(plan=base_plan, week_index=4, runs=runs)
+
+
+@pytest.mark.parametrize("runs_ratio, adapt_cap", [(0.6, 0.8), (0.87, 0.81)])
+def test_adapt_plan_produces_new_plan(generator, base_plan, runs_ratio, adapt_cap):
+    runs = runs_for_week_with_ratio(base_plan.weeks[4], runs_ratio)
+    adapted_plan = generator.adapt_training_plan(plan=base_plan, week_index=4, runs=runs)
+    assert len(base_plan.weeks) == len(adapted_plan.weeks)
+    assert base_plan.weeks[:5] == adapted_plan.weeks[:5]
+
+    long_runs_base = [
+        session
+        for week in base_plan.weeks
+        for session in week.sessions
+        if session.session_type in {"long", "race"}
+    ]
+    long_runs_adapt = [
+        session
+        for week in adapted_plan.weeks
+        for session in week.sessions
+        if session.session_type in {"long", "race"}
+    ]
+    assert long_runs_base == long_runs_adapt
+
+    ratio_adapt_to_base = (
+        adapted_plan.weeks[5].total_plan_distance() / base_plan.weeks[5].total_plan_distance()
+    )
+    assert ratio_adapt_to_base > adapt_cap
+
+
+def test_adapting_twice_compounds(generator, base_plan):
+    once = generator.adapt_training_plan(
+        plan=base_plan, week_index=4, runs=runs_for_week_with_ratio(base_plan.weeks[4], 0.75)
+    )
+    twice = generator.adapt_training_plan(
+        plan=once, week_index=6, runs=runs_for_week_with_ratio(once.weeks[6], 0.75)
+    )
+
+    assert twice.weeks[6] == once.weeks[6]
+    for once_week, twice_week in zip(once.weeks[7:], twice.weeks[7:]):
+        assert twice_week.total_plan_distance() < once_week.total_plan_distance()

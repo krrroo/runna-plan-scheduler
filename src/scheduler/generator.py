@@ -1,8 +1,8 @@
-from dataclasses import dataclass
+from dataclasses import dataclass, replace
 from datetime import date, timedelta
 
 from scheduler.config import DEFAULT_RULES, Rules
-from scheduler.distances import WeekDistances, progression
+from scheduler.distances import WeekDistances, progression, round_to_half
 from scheduler.plan import CompletedRun, Plan, RaceGoal, Runner, Week
 from scheduler.session_rules import build_week_sessions
 
@@ -113,6 +113,39 @@ class PlanGenerator:
             < self.rules.missed_distance_threshold
         )
 
-    def adapt_training_plan(
-        self, plan: Plan, runner: Runner, goal: RaceGoal, runs: list[CompletedRun]
-    ) -> Plan: ...
+    def adapt_training_plan(self, plan: Plan, week_index: int, runs: list[CompletedRun]) -> Plan:
+        """Adapts training plan from a given week onwards, based on missed distance ratio or max adapt decrease."""
+        current_week = plan.weeks[week_index]
+        ratio = current_week.total_actual_distance(runs) / current_week.total_plan_distance()
+
+        if ratio >= self.rules.missed_distance_threshold:
+            raise ValueError("Adaptation is only for distance shortfall")
+
+        ratio = max(1 - self.rules.max_adapt_decrease, ratio)
+
+        adapted_weeks = []
+        for week in plan.weeks[week_index + 1 :]:
+            week_total = week.total_plan_distance()
+            fixed_dist = sum(
+                session.distance_km
+                for session in week.sessions
+                if session.session_type in {"long", "race"}
+            )
+            scale = (
+                max(0.0, (week_total * ratio - fixed_dist) / (week_total - fixed_dist))
+                if week_total - fixed_dist > 0
+                else 1.0
+            )
+
+            new_sessions = []
+            for session in week.sessions:
+                if session.session_type in {"long", "race"}:
+                    new_sessions.append(session)
+                else:
+                    new_sessions.append(
+                        replace(session, distance_km=round_to_half(session.distance_km * scale))
+                    )
+
+            adapted_weeks.append(replace(week, sessions=tuple(new_sessions)))
+
+        return replace(plan, weeks=plan.weeks[: week_index + 1] + tuple(adapted_weeks))
