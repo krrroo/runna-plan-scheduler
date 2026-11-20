@@ -36,6 +36,8 @@ def build_week_sessions(
 
         if session_date < start_date or session_date >= goal.race_date:
             continue  # skips sessions before start date and after race date
+        elif session_date == goal.race_date - timedelta(days=1):
+            session_type = "easy"  # day before the race is always easy, even across a week boundary
         elif is_race_week and day == runner.long_run_day:
             session_type = "easy"  # long session becomes easy in race week
         elif is_day_after(day, runner.long_run_day) or is_day_after(runner.long_run_day, day):
@@ -43,8 +45,6 @@ def build_week_sessions(
         elif day == runner.long_run_day:
             session_type = "long"  # runner's chosen long run day
             last_hard_date = session_date
-        elif is_race_week and is_day_after(goal.race_date.weekday(), day):
-            session_type = "easy"  # session before race must be easy
         elif quality_count < max_quality and last_hard_date != session_date - timedelta(days=1):
             session_type = "tempo" if (week_index + quality_count) % 2 == 0 else "intervals"
             quality_count += 1

@@ -61,11 +61,14 @@ Each session type progresses in equal steps from its start to its peak (start â†
 
 ## 5. Rules
 
+Plan rules are checked by unit tests and by Hypothesis property tests.
+
 | Rule | If broken |
 |---|---|
 | Every week has easy/tempo/intervals and a long run. Long run doesn't have to happen on a partial sÄ…tart week or race week. | Bug in the generator (caught by tests) |
 | Race week ends with a race session. | Bug in the generator |
 | No tempo or intervals the day after a long run | Bug in the generator (caught by tests) |
+| The day before the race is easy, including when it falls in the previous week (e.g. a Monday race) | Bug in the generator (caught by unit and property tests) |
 | Weekly km rises by at most 10% | Not enforced yet (see open questions) Â· Warning to the user if they continue after missing mileage |
 | Volume tapers down in the final weeks | Bug in the generator (caught by tests) |
 | Training plan will only be created if race is more than 50% of training plan min week away | Raise error with info for the user |
@@ -83,4 +86,5 @@ Each session type progresses in equal steps from its start to its peak (start â†
 - Pace suggestions: where and how are they calculated?
 - What happens when a plan breaks the 10% weekly rule?
 - Limit adaptation: max number of adaptations, minimum weeks between them, or a floor relative to the original plan?
+- Before a Monday race with a Sunday long-run day, the week before loses its long run. Move it to an earlier training day instead?
  
