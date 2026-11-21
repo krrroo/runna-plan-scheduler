@@ -20,9 +20,13 @@ class Runner:
         if len(self.training_days) < 3:
             raise ValueError("Choose at least 3 training days per week.")
         if list(self.training_days) != sorted(set(self.training_days)):
-            raise ValueError("Training days must be in weekday order, without repeats.")
+            raise ValueError("Training days must be in weekday order.")
         if self.long_run_day not in self.training_days:
             raise ValueError("Long run day must be one of the training days.")
+        if self.current_race_distance_km <= 0:
+            raise ValueError("Race distance must be greater than 0 km.")
+        if self.current_race_time <= timedelta(0):
+            raise ValueError("Race time must be greater than 0.")
 
 
 @dataclass(frozen=True)
