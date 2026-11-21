@@ -94,3 +94,23 @@ def test_runner_accepts_valid_training_days():
         long_run_day=6,
     )
     assert runner.training_days == (1, 3, 6)
+
+
+@pytest.mark.parametrize(
+    "race_distance_km, race_time, message",
+    [
+        (0.0, timedelta(minutes=30), "Race distance"),
+        (-5.0, timedelta(minutes=30), "Race distance"),
+        (5.0, timedelta(0), "Race time"),
+        (5.0, timedelta(minutes=-30), "Race time"),
+    ],
+    ids=["zero_distance", "negative_distance", "zero_time", "negative_time"],
+)
+def test_runner_rejects_invalid_values(race_distance_km, race_time, message):
+    with pytest.raises(ValueError, match=message):
+        Runner(
+            current_race_distance_km=race_distance_km,
+            current_race_time=race_time,
+            training_days=(1, 3, 6),
+            long_run_day=6,
+        )

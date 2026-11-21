@@ -82,3 +82,9 @@ def test_cli_rejects_unsupported_goal(capsys):
         )
     assert exit_info.value.code == 2
     assert "Please choose a different goal than 'marathon'" in capsys.readouterr().err
+
+
+def test_cli_reports_zero_race_time(capsys):
+    code = main(BASE_ARGS + ["--race-time", "0:00"])
+    assert code == 1
+    assert "Race time" in capsys.readouterr().err
