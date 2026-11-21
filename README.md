@@ -15,7 +15,7 @@ Options:
   - 10k: `10k` or `10km`
   - Half marathon: `half`, `half-marathon`, `21k`, `21km`, `21.1k`, `21.1km` or `"half marathon"`
 - `--race-date`: `YYYY-MM-DD`
-- `--days`: training days, min 3, max 6, `tue,thu,sun` or `tuesday,thursday,sunday`
+- `--days`: training days, min 3, `tue,thu,sun` or `tuesday,thursday,sunday`
 - `--long-run-day`: one of the training days, e.g. `sun`
 - `--start-date`: `YYYY-MM-DD`
 - `--race-time`: default: 30:00
