@@ -20,26 +20,35 @@ def make_plan(
     generator, training_days, long_run_day, start_date=date(2026, 12, 14), race_date=RACE_DATE
 ):
     runner = Runner(
+        runner_id="runner-1",
         current_race_time=timedelta(minutes=30, seconds=12),
         current_race_distance_km=5.0,
         training_days=training_days,
         long_run_day=long_run_day,
+        time_zone="Europe/London",
     )
     goal = RaceGoal(race_date=race_date, profile=PLAN_5K)
     return generator.generate_training_plan(runner=runner, goal=goal, start_date=start_date)
 
 
 def runs_for_week_with_ratio(week, ratio=float):
-    return [CompletedRun(date=s.date, distance_km=s.distance_km * ratio) for s in week.sessions]
+    return [
+        CompletedRun(
+            runner_id="runner-1", source_id="run-1", date=s.date, distance_km=s.distance_km * ratio
+        )
+        for s in week.sessions
+    ]
 
 
 @pytest.fixture(params=[6, 5], ids=["sunday_long_run", "saturday_long_run"])
 def runner(request):
     return Runner(
+        runner_id="runner-1",
         current_race_time=timedelta(minutes=30, seconds=12),
         current_race_distance_km=5.0,
         training_days=(1, 3, 4, 5, 6),
         long_run_day=request.param,
+        time_zone="Europe/London",
     )
 
 
@@ -298,17 +307,41 @@ def test_short_plan_starts_partway_along_the_curve(generator):
     [
         (
             [
-                CompletedRun(date=date(2026, 12, 8), distance_km=4.1),
-                CompletedRun(date=date(2026, 12, 10), distance_km=5.3),
-                CompletedRun(date=date(2026, 12, 12), distance_km=6.03),
+                CompletedRun(
+                    runner_id="runner-1", source_id="run-1", date=date(2026, 12, 8), distance_km=4.1
+                ),
+                CompletedRun(
+                    runner_id="runner-1",
+                    source_id="run-1",
+                    date=date(2026, 12, 10),
+                    distance_km=5.3,
+                ),
+                CompletedRun(
+                    runner_id="runner-1",
+                    source_id="run-1",
+                    date=date(2026, 12, 12),
+                    distance_km=6.03,
+                ),
             ],
             True,
         ),
         (
             [
-                CompletedRun(date=date(2026, 12, 8), distance_km=5.1),
-                CompletedRun(date=date(2026, 12, 10), distance_km=6.8),
-                CompletedRun(date=date(2026, 12, 12), distance_km=8.03),
+                CompletedRun(
+                    runner_id="runner-1", source_id="run-1", date=date(2026, 12, 8), distance_km=5.1
+                ),
+                CompletedRun(
+                    runner_id="runner-1",
+                    source_id="run-1",
+                    date=date(2026, 12, 10),
+                    distance_km=6.8,
+                ),
+                CompletedRun(
+                    runner_id="runner-1",
+                    source_id="run-1",
+                    date=date(2026, 12, 12),
+                    distance_km=8.03,
+                ),
             ],
             False,
         ),

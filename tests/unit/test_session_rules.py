@@ -16,10 +16,12 @@ DISTANCES = WeekDistances(long_km=10.0, easy_km=5.0, tempo_km=4.5, intervals_km=
 
 def make_runner(training_days=(1, 3, 6), long_run_day=6):
     return Runner(
+        runner_id="runner-1",
         current_race_time=timedelta(minutes=30, seconds=12),
         current_race_distance_km=5.0,
         training_days=training_days,
         long_run_day=long_run_day,
+        time_zone="Europe/London",
     )
 
 

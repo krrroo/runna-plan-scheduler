@@ -110,6 +110,11 @@ def build_parser() -> argparse.ArgumentParser:
         default=5.0,
         help="recent race distance in km (default: 5)",
     )
+    parser.add_argument(
+        "--time-zone",
+        default="Europe/London",
+        help="IANA time zone, e.g. Europe/London (default: Europe/London)",
+    )
     return parser
 
 
@@ -133,10 +138,12 @@ def main(argv: list[str] | None = None) -> int:
     args = build_parser().parse_args(argv)
     try:
         runner = Runner(
+            runner_id="cli",
             current_race_distance_km=args.race_distance,
             current_race_time=args.race_time,
             training_days=args.days,
             long_run_day=args.long_run_day,
+            time_zone=args.time_zone,
         )
         goal = RaceGoal(profile=args.goal, race_date=args.race_date)
         plan = PlanGenerator().generate_training_plan(runner, goal, args.start_date)

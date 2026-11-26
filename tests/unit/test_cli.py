@@ -88,3 +88,9 @@ def test_cli_reports_zero_race_time(capsys):
     code = main(BASE_ARGS + ["--race-time", "0:00"])
     assert code == 1
     assert "Race time" in capsys.readouterr().err
+
+
+def test_cli_reports_unknown_time_zone(capsys):
+    code = main(BASE_ARGS + ["--time-zone", "Mars/Base"])
+    assert code == 1
+    assert "Unknown time zone" in capsys.readouterr().err

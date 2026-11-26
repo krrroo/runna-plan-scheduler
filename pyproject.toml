@@ -6,6 +6,7 @@ build-backend = "setuptools.build_meta"
 name = "scheduler"
 version = "0.1.0"
 requires-python = ">=3.10"
+dependencies = ["tzdata"]
 
 [project.optional-dependencies]
 dev = ["pytest", "hypothesis", "ruff"]

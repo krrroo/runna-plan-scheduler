@@ -1,6 +1,7 @@
 from dataclasses import dataclass
 from datetime import date, timedelta
 from typing import Literal
+from zoneinfo import ZoneInfo, ZoneInfoNotFoundError
 
 from scheduler.config import GoalProfile
 
@@ -11,10 +12,12 @@ SessionType = Literal["easy", "tempo", "intervals", "long", "race"]
 class Runner:
     """One runners characteristics"""
 
+    runner_id: str
     current_race_distance_km: float
     current_race_time: timedelta
     training_days: tuple[int, ...]  # 0 = Monday … 6 = Sunday
     long_run_day: int  # one of training_days
+    time_zone: str
 
     def __post_init__(self) -> None:
         if len(self.training_days) < 3:
@@ -27,6 +30,11 @@ class Runner:
             raise ValueError("Race distance must be greater than 0 km.")
         if self.current_race_time <= timedelta(0):
             raise ValueError("Race time must be greater than 0.")
+
+        try:
+            ZoneInfo(self.time_zone)
+        except (ZoneInfoNotFoundError, ValueError):
+            raise ValueError(f"Unknown time zone '{self.time_zone}'.") from None
 
 
 @dataclass(frozen=True)
@@ -50,6 +58,8 @@ class Session:
 class CompletedRun:
     """Tracks runners actual distance per run"""
 
+    runner_id: str
+    source_id: str
     date: date
     distance_km: float
 
