@@ -37,10 +37,12 @@ def runners(draw):
     training_days = tuple(sorted(days))
     long_run_day = draw(st.sampled_from(training_days))
     return Runner(
+        runner_id="runner-1",
         current_race_time=timedelta(minutes=30),
         current_race_distance_km=5.0,
         training_days=training_days,
         long_run_day=long_run_day,
+        time_zone="Europe/London",
     )
 
 

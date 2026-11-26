@@ -32,25 +32,61 @@ def test_week_total_distance_returns_0_when_no_sessions():
     [
         (
             [
-                CompletedRun(date=date(2026, 12, 8), distance_km=5.1),
-                CompletedRun(date=date(2026, 12, 10), distance_km=6.3),
-                CompletedRun(date=date(2026, 12, 12), distance_km=8.03),
+                CompletedRun(
+                    runner_id="runner-1", source_id="run-1", date=date(2026, 12, 8), distance_km=5.1
+                ),
+                CompletedRun(
+                    runner_id="runner-1",
+                    source_id="run-1",
+                    date=date(2026, 12, 10),
+                    distance_km=6.3,
+                ),
+                CompletedRun(
+                    runner_id="runner-1",
+                    source_id="run-1",
+                    date=date(2026, 12, 12),
+                    distance_km=8.03,
+                ),
             ],
             19.43,
         ),
         (
             [
-                CompletedRun(date=date(2026, 11, 8), distance_km=5.1),
-                CompletedRun(date=date(2026, 11, 10), distance_km=6.3),
-                CompletedRun(date=date(2026, 11, 12), distance_km=8.03),
+                CompletedRun(
+                    runner_id="runner-1", source_id="run-1", date=date(2026, 11, 8), distance_km=5.1
+                ),
+                CompletedRun(
+                    runner_id="runner-1",
+                    source_id="run-1",
+                    date=date(2026, 11, 10),
+                    distance_km=6.3,
+                ),
+                CompletedRun(
+                    runner_id="runner-1",
+                    source_id="run-1",
+                    date=date(2026, 11, 12),
+                    distance_km=8.03,
+                ),
             ],
             0,
         ),
         (
             [
-                CompletedRun(date=date(2026, 12, 8), distance_km=5.1),
-                CompletedRun(date=date(2026, 12, 10), distance_km=6.3),
-                CompletedRun(date=date(2026, 11, 12), distance_km=8.03),
+                CompletedRun(
+                    runner_id="runner-1", source_id="run-1", date=date(2026, 12, 8), distance_km=5.1
+                ),
+                CompletedRun(
+                    runner_id="runner-1",
+                    source_id="run-1",
+                    date=date(2026, 12, 10),
+                    distance_km=6.3,
+                ),
+                CompletedRun(
+                    runner_id="runner-1",
+                    source_id="run-1",
+                    date=date(2026, 11, 12),
+                    distance_km=8.03,
+                ),
             ],
             11.4,
         ),
@@ -79,19 +115,23 @@ def test_week_actual_distance_returns_zero(week):
 def test_runner_rejects_invalid_training_days(training_days, long_run_day, message):
     with pytest.raises(ValueError, match=message):
         Runner(
+            runner_id="runner-1",
             current_race_time=timedelta(minutes=30, seconds=12),
             current_race_distance_km=5.0,
             training_days=training_days,
             long_run_day=long_run_day,
+            time_zone="Europe/London",
         )
 
 
 def test_runner_accepts_valid_training_days():
     runner = Runner(
+        runner_id="runner-1",
         current_race_time=timedelta(minutes=30, seconds=12),
         current_race_distance_km=5.0,
         training_days=(1, 3, 6),
         long_run_day=6,
+        time_zone="Europe/London",
     )
     assert runner.training_days == (1, 3, 6)
 
@@ -109,8 +149,23 @@ def test_runner_accepts_valid_training_days():
 def test_runner_rejects_invalid_values(race_distance_km, race_time, message):
     with pytest.raises(ValueError, match=message):
         Runner(
+            runner_id="runner-1",
             current_race_distance_km=race_distance_km,
             current_race_time=race_time,
             training_days=(1, 3, 6),
             long_run_day=6,
+            time_zone="Europe/London",
+        )
+
+
+@pytest.mark.parametrize("time_zone", ["Mars/Base", "", "not a zone"])
+def test_runner_rejects_unknown_time_zone(time_zone):
+    with pytest.raises(ValueError, match="Unknown time zone"):
+        Runner(
+            runner_id="runner-1",
+            current_race_distance_km=5.0,
+            current_race_time=timedelta(minutes=30),
+            training_days=(1, 3, 6),
+            long_run_day=6,
+            time_zone=time_zone,
         )
